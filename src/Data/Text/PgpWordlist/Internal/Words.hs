@@ -1,107 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
--- | Core functionality for conversion between binary formats and PGP word
---   lists.
-module Data.Text.PgpWordlist.Internal.Tables where
+module Data.Text.PgpWordlist.Internal.Words where
 
 
 
-import           Data.Text.PgpWordlist.Internal.AltList (AltList)
-import qualified Data.Text.PgpWordlist.Internal.AltList as Alt
-
-import           Data.Bimap                             (Bimap, (!))
-import qualified Data.Bimap                             as BM
-
-import qualified Data.ByteString.Lazy                   as BSL
-import           Data.Text                              (Text)
-import qualified Data.Text                              as T
+import           Data.Text.PgpWordlist.Internal.Types
 import           Data.Word
-
-
-
--- | Abstract representation of a PGP word list.
-newtype PgpWordlist = PgpWordlist (AltList EvenWord OddWord)
-    deriving (Eq, Ord, Show)
-
-
-
--- | Possible translation errors from a list of PGP words to binary format.
-data TranslationError =
-      BadWord Text         -- ^ Word is not recognized
-    | BadParity Text Word8 -- ^ Word is recognized, but from the wrong
-                           --   alphabet. Duplicates, omissions, and neighbour
-                           --   transpositions are often cause for this.
-    deriving (Eq, Ord, Show)
-
-
-
--- | Inverse of 'fromText', modulo whitespace count.
-toText :: BSL.ByteString -> Text
-toText = T.intercalate " "
-       . Alt.toList
-       . Alt.bimap (unEvenWord . toEvenWord) (unOddWord . toOddWord)
-       . Alt.fromList
-       . BSL.unpack
-
-
-
--- | Convert a text of whitespace-separated words to their binary
---   representation. The whitespace splitting behaviour is given by 'T.words'.
-fromText :: Text -> Either TranslationError BSL.ByteString
-fromText = fmap (BSL.pack . Alt.toList)
-         . Alt.bitraverse fromEvenWord fromOddWord
-         . Alt.fromList
-         . T.words
-
-
-
--- | Word that is supposed to occur in an even position
-newtype EvenWord = EvenWord { unEvenWord :: Text }
-    deriving (Eq, Ord, Show)
-
--- | Look up the word corresponding to a byte.
-toEvenWord :: Word8 -> EvenWord
-toEvenWord = (evenMap !) -- evenMap is total, so the lookup is safe
-
--- | Simple conversion, taking into account invalid words.
-fromEvenWord :: Text -> Either TranslationError Word8
-fromEvenWord word = case BM.lookupR (EvenWord word) evenMap of
-    Just i  -> Right i
-    Nothing -> Left (case BM.lookupR (OddWord word) oddMap of
-        Just j  -> BadParity word j
-        Nothing -> BadWord word)
-
--- | Mapping from and to 'EvenWord's
-evenMap :: Bimap Word8 EvenWord
-evenMap = BM.fromList (map pick12 wordList)
-  where
-    pick12 :: (a,b,c) -> (a,b)
-    pick12 (i,e,_) = (i,e)
-
-
-
--- | Word that is supposed to occur in an odd position
-newtype OddWord = OddWord { unOddWord :: Text }
-    deriving (Eq, Ord, Show)
-
--- | Look up the word corresponding to a byte.
-toOddWord :: Word8 -> OddWord
-toOddWord = (oddMap !) -- oddMap is total, so the lookup is safe
-
--- | Simple conversion, taking into account invalid words.
-fromOddWord :: Text -> Either TranslationError Word8
-fromOddWord word = case BM.lookupR (OddWord word) oddMap of
-    Just i  -> Right i
-    Nothing -> Left (case BM.lookupR (EvenWord word) evenMap of
-        Just j  -> BadParity word j
-        Nothing -> BadWord word)
-
--- | Mapping from and to 'OddWord's
-oddMap :: Bimap Word8 OddWord
-oddMap = BM.fromList (map pick13 wordList)
-  where
-    pick13 :: (a,b,c) -> (a,c)
-    pick13 (i,_,o) = (i,o)
 
 
 

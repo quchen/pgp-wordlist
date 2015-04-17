@@ -1,16 +1,16 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ParallelListComp #-}
+{-# LANGUAGE ParallelListComp  #-}
 
 module Main where
 
 
 
-import           Data.Text.PgpWordlist.Internal.Tables
+import           Data.Text.PgpWordlist.Internal.Convert
 
-import qualified Data.ByteString.Lazy                  as BSL
+import qualified Data.ByteString.Lazy                   as BSL
 import           Test.Tasty
-import qualified Test.Tasty.HUnit                      as HU
-import qualified Test.Tasty.QuickCheck                 as QC
+import qualified Test.Tasty.HUnit                       as HU
+import qualified Test.Tasty.QuickCheck                  as QC
 import           Text.Printf
 
 

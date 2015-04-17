@@ -5,4 +5,7 @@ module Data.Text.PgpWordlist (
     , TranslationError(..)
 ) where
 
-import Data.Text.PgpWordlist.Internal.Tables
+
+
+import           Data.Text.PgpWordlist.Internal.Convert
+import           Data.Text.PgpWordlist.Internal.Types

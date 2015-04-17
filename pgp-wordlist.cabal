@@ -44,7 +44,9 @@ source-repository head
 library
     exposed-modules:     Data.Text.PgpWordlist
                        , Data.Text.PgpWordlist.Internal.AltList
-                       , Data.Text.PgpWordlist.Internal.Tables
+                       , Data.Text.PgpWordlist.Internal.Convert
+                       , Data.Text.PgpWordlist.Internal.Types
+                       , Data.Text.PgpWordlist.Internal.Words
     build-depends:       base >=4.6 && < 5
                        , bimap >=0.3 && <0.4
                        , bytestring >=0.10 && <0.11
