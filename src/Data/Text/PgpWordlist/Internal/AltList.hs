@@ -1,5 +1,5 @@
 -- | Defines a type of list that containins two alternating element types.
-module Data.Text.PgpWordlist.AltList (
+module Data.Text.PgpWordlist.Internal.AltList (
       AltList(..)
 
     -- * Construction, deconstruction

@@ -2,23 +2,19 @@
 
 -- | Core functionality for conversion between binary formats and PGP word
 --   lists.
-module Data.Text.PgpWordlist.Tables (
-      toText
-    , fromText
-    , TranslationError(..)
-) where
+module Data.Text.PgpWordlist.Internal.Tables where
 
 
 
-import           Data.Text.PgpWordlist.AltList (AltList)
-import qualified Data.Text.PgpWordlist.AltList as Alt
+import           Data.Text.PgpWordlist.Internal.AltList (AltList)
+import qualified Data.Text.PgpWordlist.Internal.AltList as Alt
 
-import           Data.Bimap                    (Bimap, (!))
-import qualified Data.Bimap                    as BM
+import           Data.Bimap                             (Bimap, (!))
+import qualified Data.Bimap                             as BM
 
-import qualified Data.ByteString.Lazy          as BSL
-import           Data.Text                     (Text)
-import qualified Data.Text                     as T
+import qualified Data.ByteString.Lazy                   as BSL
+import           Data.Text                              (Text)
+import qualified Data.Text                              as T
 import           Data.Word
 
 
@@ -53,12 +49,13 @@ toText = T.intercalate " "
 --   representation. The whitespace splitting behaviour is given by 'T.words'.
 fromText :: Text -> Either TranslationError BSL.ByteString
 fromText = fmap (BSL.pack . Alt.toList)
-         . Alt.bitraverse fromOddWord fromEvenWord
+         . Alt.bitraverse fromEvenWord fromOddWord
          . Alt.fromList
          . T.words
 
 
 
+-- | Word that is supposed to occur in an even position
 newtype EvenWord = EvenWord { unEvenWord :: Text }
     deriving (Eq, Ord, Show)
 
@@ -74,6 +71,7 @@ fromEvenWord word = case BM.lookupR (EvenWord word) evenMap of
         Just j  -> BadParity word j
         Nothing -> BadWord word)
 
+-- | Mapping from and to 'EvenWord's
 evenMap :: Bimap Word8 EvenWord
 evenMap = BM.fromList (map pick12 wordList)
   where
@@ -82,6 +80,7 @@ evenMap = BM.fromList (map pick12 wordList)
 
 
 
+-- | Word that is supposed to occur in an odd position
 newtype OddWord = OddWord { unOddWord :: Text }
     deriving (Eq, Ord, Show)
 
@@ -97,6 +96,7 @@ fromOddWord word = case BM.lookupR (OddWord word) oddMap of
         Just j  -> BadParity word j
         Nothing -> BadWord word)
 
+-- | Mapping from and to 'OddWord's
 oddMap :: Bimap Word8 OddWord
 oddMap = BM.fromList (map pick13 wordList)
   where
