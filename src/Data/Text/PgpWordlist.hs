@@ -1,13 +1,8 @@
+-- | Translate between binary data and a human-readable collection of words.
 module Data.Text.PgpWordlist (
-    -- * Main functionality
-      fromText
-    , fromLazyBS
-
-    -- * Might be useful
-    , toEvenWord
-    , fromEvenWord
-    , toOddWord
-    , fromOddWord
+      toText
+    , fromText
+    , TranslationError(..)
 ) where
 
 import Data.Text.PgpWordlist.Tables

@@ -1,47 +1,31 @@
-module Data.Text.PgpWordlist.Tables (
-      fromText
-    , fromLazyBS
+{-# LANGUAGE OverloadedStrings #-}
 
-    , toEvenWord
-    , fromEvenWord
-    , toOddWord
-    , fromOddWord
+-- | Core functionality for conversion between binary formats and PGP word
+--   lists.
+module Data.Text.PgpWordlist.Tables (
+      toText
+    , fromText
+    , TranslationError(..)
 ) where
+
+
 
 import           Data.Text.PgpWordlist.AltList (AltList)
 import qualified Data.Text.PgpWordlist.AltList as Alt
 
-import           Data.Bimap                    (Bimap, (!), (!>))
+import           Data.Bimap                    (Bimap, (!))
 import qualified Data.Bimap                    as BM
 
-import           Data.Binary
 import qualified Data.ByteString.Lazy          as BSL
 import           Data.Text                     (Text)
 import qualified Data.Text                     as T
+import           Data.Word
 
 
 
 -- | Abstract representation of a PGP word list.
 newtype PgpWordlist = PgpWordlist (AltList EvenWord OddWord)
     deriving (Eq, Ord, Show)
-
--- | Identical to the corresponding 'BSL.ByteString' representation.
-instance Binary PgpWordlist where
-    put (PgpWordlist wl) = toBSL wl
-      where
-        toBSL = put
-              . BSL.pack
-              . map unRight
-              . Alt.toList
-              . Alt.bimap (fromEvenWord . unEvenWord) (fromOddWord . unOddWord)
-        unEvenWord (EvenWord w) = w
-        unOddWord  (OddWord  w) = w
-        unRight (Right r) = r
-        unRight (Left _)  = error "unRight: Left value"
-
-    get = fmap fromLazyBS get
-
-
 
 
 
@@ -53,6 +37,18 @@ data TranslationError =
                            --   transpositions are often cause for this.
     deriving (Eq, Ord, Show)
 
+
+
+-- | Inverse of 'fromText', modulo whitespace count.
+toText :: BSL.ByteString -> Text
+toText = T.intercalate " "
+       . Alt.toList
+       . Alt.bimap (unEvenWord . toEvenWord) (unOddWord . toOddWord)
+       . Alt.fromList
+       . BSL.unpack
+
+
+
 -- | Convert a text of whitespace-separated words to their binary
 --   representation. The whitespace splitting behaviour is given by 'T.words'.
 fromText :: Text -> Either TranslationError BSL.ByteString
@@ -61,25 +57,16 @@ fromText = fmap (BSL.pack . Alt.toList)
          . Alt.fromList
          . T.words
 
--- | Simple conversion.
-fromLazyBS :: BSL.ByteString -> PgpWordlist
-fromLazyBS = PgpWordlist
-           . Alt.bimap toEvenWord toOddWord
-           . Alt.fromList
-           . BSL.unpack
 
 
-
-newtype EvenWord = EvenWord Text
+newtype EvenWord = EvenWord { unEvenWord :: Text }
     deriving (Eq, Ord, Show)
 
-instance Binary EvenWord where
-    put w = put (evenMap !> w)
-    get = fmap toEvenWord get
-
+-- | Look up the word corresponding to a byte.
 toEvenWord :: Word8 -> EvenWord
 toEvenWord = (evenMap !) -- evenMap is total, so the lookup is safe
 
+-- | Simple conversion, taking into account invalid words.
 fromEvenWord :: Text -> Either TranslationError Word8
 fromEvenWord word = case BM.lookupR (EvenWord word) evenMap of
     Just i  -> Right i
@@ -95,16 +82,14 @@ evenMap = BM.fromList (map pick12 wordList)
 
 
 
-newtype OddWord = OddWord Text
+newtype OddWord = OddWord { unOddWord :: Text }
     deriving (Eq, Ord, Show)
 
-instance Binary OddWord where
-    put w = put (oddMap !> w)
-    get = fmap toOddWord get
-
+-- | Look up the word corresponding to a byte.
 toOddWord :: Word8 -> OddWord
 toOddWord = (oddMap !) -- oddMap is total, so the lookup is safe
 
+-- | Simple conversion, taking into account invalid words.
 fromOddWord :: Text -> Either TranslationError Word8
 fromOddWord word = case BM.lookupR (OddWord word) oddMap of
     Just i  -> Right i
@@ -121,11 +106,8 @@ oddMap = BM.fromList (map pick13 wordList)
 
 
 wordList :: [(Word8, EvenWord, OddWord)]
-wordList = map (\(i,e,o) -> (i, evenWord e, oddWord o)) table
+wordList = map (\(i,e,o) -> (i, EvenWord e, OddWord o)) table
   where
-    evenWord = EvenWord . T.pack
-    oddWord  = OddWord  . T.pack
-
     table = [ (0x00, "aardvark" , "adroitness" )
             , (0x01, "absurd"   , "adviser"    )
             , (0x02, "accrue"   , "aftermath"  )
