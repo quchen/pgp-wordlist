@@ -2,22 +2,34 @@
 -- documentation, see http://haskell.org/cabal/users-guide/
 
 name:                pgp-wordlist
-version:             0.1.0.0
+version:             0.1
 synopsis:            Translate between binary data and a human-readable
                      collection of words.
 description:         The PGP Word List consists of two phonetic alphabets, each
                      with one word per possible byte value. A string of bytes
                      is translated with these alphabets, alternating between
                      them at each byte.
+                     .
+                     For further information, see
+                     <http://en.wikipedia.org/wiki/PGP_word_list Wikipedia>.
 license:             BSD3
 license-file:        LICENSE
 author:              David Luposchainsky <dluposchainsky(λ)gmail.com>
 maintainer:          David Luposchainsky <dluposchainsky(λ)gmail.com>
 copyright:           David Luposchainsky <dluposchainsky(λ)gmail.com>
--- category:
+homepage:            https://github.com/quchen/pgp-wordlist
+bug-reports:         https://github.com/quchen/pgp-wordlist/issues
+category:            Data, Serialization
 build-type:          Simple
--- extra-source-files:
 cabal-version:       >=1.10
+
+
+
+source-repository head
+  type:     git
+  location: https://github.com/quchen/pgp-wordlist
+
+
 
 library
     exposed-modules:     Data.Text.PgpWordlist
@@ -30,6 +42,7 @@ library
     hs-source-dirs:      src
     ghc-options:         -Wall
     default-language:    Haskell2010
+
 
 
 test-suite tasty
