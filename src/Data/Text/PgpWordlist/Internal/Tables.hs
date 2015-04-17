@@ -105,6 +105,7 @@ oddMap = BM.fromList (map pick13 wordList)
 
 
 
+-- | Database of PGP words
 wordList :: [(Word8, EvenWord, OddWord)]
 wordList = map (\(i,e,o) -> (i, EvenWord e, OddWord o)) table
   where
