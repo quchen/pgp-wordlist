@@ -39,7 +39,7 @@ library
     exposed-modules:     Data.Text.PgpWordlist
                        , Data.Text.PgpWordlist.Internal.AltList
                        , Data.Text.PgpWordlist.Internal.Tables
-    build-depends:       base >=4.6
+    build-depends:       base >=4.6 && < 5
                        , bimap >=0.3 && <0.4
                        , bytestring >=0.10 && <0.11
                        , text >=1.2 && <1.3

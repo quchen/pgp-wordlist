@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 -- | Defines a type of list that containins two alternating element types.
 module Data.Text.PgpWordlist.Internal.AltList (
       AltList(..)
@@ -15,6 +17,14 @@ module Data.Text.PgpWordlist.Internal.AltList (
     , bisequence
     , bitraverse
 ) where
+
+
+
+#if __GLASGOW_HASKELL__ < 710
+import Control.Applicative
+#endif
+
+
 
 -- | List of elements of alternating element types.
 data AltList a b = Nil | Cons a (AltList b a)
