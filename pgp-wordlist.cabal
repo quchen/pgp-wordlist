@@ -10,6 +10,9 @@ description:         The PGP Word List consists of two phonetic alphabets, each
                      is translated with these alphabets, alternating between
                      them at each byte.
                      .
+                     The PGP words corresponding to the bytes @5B 1D CA 6E@
+                     are "erase breakaway spellbind headwaters", for example.
+                     .
                      For further information, see
                      <http://en.wikipedia.org/wiki/PGP_word_list Wikipedia>.
 license:             BSD3
@@ -36,7 +39,7 @@ library
     exposed-modules:     Data.Text.PgpWordlist
                        , Data.Text.PgpWordlist.Internal.AltList
                        , Data.Text.PgpWordlist.Internal.Tables
-    build-depends:       base >=4.8 && <4.9
+    build-depends:       base >=4.6
                        , bimap >=0.3 && <0.4
                        , bytestring >=0.10 && <0.11
                        , text >=1.2 && <1.3
