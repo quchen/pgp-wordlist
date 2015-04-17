@@ -8,7 +8,6 @@ module Main where
 import           Data.Text.PgpWordlist.Internal.Tables
 
 import qualified Data.ByteString.Lazy                  as BSL
-import qualified Data.Text                             as T
 import           Test.Tasty
 import qualified Test.Tasty.HUnit                      as HU
 import qualified Test.Tasty.QuickCheck                 as QC
@@ -110,7 +109,11 @@ examplesBackAndForth = testGroup "Conversion beween various examples" tests
         ]
 
 randomRoundtrips :: TestTree
-randomRoundtrips = testGroup "Random roundtrips"
-    [ QC.testProperty "Bytes -> PGP words -> Bytes" $
-        \bs -> fromText (toText bs) == Right bs
-    ]
+randomRoundtrips = makeGroup tests
+  where
+    makeGroup = localOption (QC.QuickCheckMaxSize 1024)
+              . testGroup "Random roundtrips"
+    tests = [ QC.testProperty "Bytes -> PGP words -> Bytes" $
+                \bytes -> let bs = BSL.pack bytes
+                          in  fromText (toText bs) == Right bs
+            ]
