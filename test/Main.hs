@@ -3,12 +3,16 @@
 
 module Main where
 
+
+
+import           Data.Text.PgpWordlist.Internal.Tables
+
+import qualified Data.ByteString.Lazy                  as BSL
+import qualified Data.Text                             as T
 import           Test.Tasty
-import qualified Test.Tasty.HUnit      as HU
-import Text.Printf
-import qualified Data.ByteString.Lazy as BSL
-import Data.Text.PgpWordlist.Internal.Tables
-import qualified Data.Text as T
+import qualified Test.Tasty.HUnit                      as HU
+import qualified Test.Tasty.QuickCheck                 as QC
+import           Text.Printf
 
 
 
@@ -20,7 +24,8 @@ main = defaultMain tree
 tree :: TestTree
 tree = testGroup "Tests"
     [ allBytesConvertible
-    , arbitraryBytes
+    , examplesBackAndForth
+    , randomRoundtrips
     ]
 
 
@@ -38,13 +43,13 @@ allBytesConvertible = testGroup "All bytes have a corresponding word" tests
 
 
 
-arbitraryBytes :: TestTree
-arbitraryBytes = testGroup "Conversion beween various examples" tests
+examplesBackAndForth :: TestTree
+examplesBackAndForth = testGroup "Conversion beween various examples" tests
   where
     tests = concat
-        [ [ HU.testCase (printf "#%2d: %s -> %s" i (bsToHex bytes) (T.unpack pgpWords))
+        [ [ HU.testCase (printf "#%2d: %s -> PGP words" i (bsToHex bytes))
                         (HU.assertEqual "" (toText bytes) pgpWords)
-          , HU.testCase (printf "#%2d: %s <- %s" i (bsToHex bytes) (T.unpack pgpWords))
+          , HU.testCase (printf "#%2d: PGP words -> %s" i (bsToHex bytes))
                         (HU.assertEqual "" (Right bytes) (fromText pgpWords))
           ]
         | (bytes, pgpWords) <- testCases
@@ -103,3 +108,9 @@ arbitraryBytes = testGroup "Conversion beween various examples" tests
           , "drunken finicky lockup torpedo beeswax recipe gremlin retraction"
           )
         ]
+
+randomRoundtrips :: TestTree
+randomRoundtrips = testGroup "Random roundtrips"
+    [ QC.testProperty "Bytes -> PGP words -> Bytes" $
+        \bs -> fromText (toText bs) == Right bs
+    ]
