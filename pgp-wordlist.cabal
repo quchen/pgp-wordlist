@@ -5,7 +5,10 @@ name:                pgp-wordlist
 version:             0.1
 synopsis:            Translate between binary data and a human-readable
                      collection of words.
-description:         The PGP Word List consists of two phonetic alphabets, each
+description:         Translate between binary data and a human-readable
+                     collection of words.
+                     .
+                     The PGP Word List consists of two phonetic alphabets, each
                      with one word per possible byte value. A string of bytes
                      is translated with these alphabets, alternating between
                      them at each byte.
@@ -26,6 +29,9 @@ category:            Data, Serialization
 build-type:          Simple
 cabal-version:       >=1.10
 extra-source-files:  README.md
+tested-with:         GHC == 7.6.3
+                   , GHC == 7.8.4
+                   , GHC == 7.10.1
 
 
 
