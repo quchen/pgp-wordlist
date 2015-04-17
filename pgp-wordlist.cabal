@@ -22,6 +22,7 @@ bug-reports:         https://github.com/quchen/pgp-wordlist/issues
 category:            Data, Serialization
 build-type:          Simple
 cabal-version:       >=1.10
+extra-source-files:  README.md
 
 
 
