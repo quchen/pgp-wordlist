@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP #-}
 
--- | Defines a type of list that contains two alternating element types.
+-- | A type of list that contains two alternating element types.
 module Data.Text.PgpWordlist.Internal.AltList (
       AltList(..)
 
@@ -62,8 +62,7 @@ first f (Cons x (Cons y ys)) = Cons (f x) (Cons y (first f ys))
 -- @
 second :: (b -> b') -> AltList a b -> AltList a b'
 second _ Nil = Nil
-second _ (Cons x Nil) = Cons x Nil
-second g (Cons x (Cons y ys)) = Cons x (Cons (g y) (second g ys))
+second g (Cons x xs) = Cons x (first g xs)
 
 
 
