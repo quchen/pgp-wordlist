@@ -1,6 +1,6 @@
 {-# LANGUAGE CPP #-}
 
--- | Defines a type of list that containins two alternating element types.
+-- | Defines a type of list that contains two alternating element types.
 module Data.Text.PgpWordlist.Internal.AltList (
       AltList(..)
 
