@@ -24,6 +24,10 @@ module Data.Text.PgpWordlist.Internal.AltList (
 import Control.Applicative
 #endif
 
+#if MIN_VERSION_base(4,8,0)
+import qualified Data.Bifunctor as Bi
+#endif
+
 
 
 -- | List of elements of alternating element types.
@@ -74,6 +78,15 @@ second g (Cons x xs) = Cons x (first g xs)
 bimap :: (a -> a') -> (b -> b') -> AltList a b -> AltList a' b'
 bimap _ _ Nil = Nil
 bimap f g (Cons x xs) = Cons (f x) (bimap g f xs)
+
+
+
+#if MIN_VERSION_base(4,8,0)
+instance Bi.Bifunctor AltList where
+    first = first
+    second = second
+    bimap = bimap
+#endif
 
 
 
