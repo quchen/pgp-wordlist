@@ -12,6 +12,7 @@ import           Test.Tasty
 import qualified Test.Tasty.HUnit                       as HU
 import qualified Test.Tasty.QuickCheck                  as QC
 import           Text.Printf
+import           Data.Word
 
 
 
@@ -32,13 +33,17 @@ tree = testGroup "Tests"
 allBytesConvertible :: TestTree
 allBytesConvertible = testGroup "All bytes have a corresponding word" tests
   where
-    tests = map evenTest [0..] ++ map oddTest [0..]
-    evenTest i = HU.testCase (printf "%02x is convertible to an even word" i)
-                             (evenTestAssertion i)
-    oddTest  i = HU.testCase (printf "%02x is convertible to an odd word" i)
-                             (oddTestAssertion i)
-    evenTestAssertion i = HU.assertBool "" (toEvenWord i `seq` True)
-    oddTestAssertion  i = HU.assertBool "" (toOddWord  i `seq` True)
+    tests = splice (map evenTest allWord8) (map oddTest allWord8)
+    allWord8 = [minBound ..] :: [Word8]
+    evenTest = testExists "%02x is convertible to an even word" toEvenWord
+    oddTest  = testExists "%02x is convertible to an odd word"  toOddWord
+    testExists msg f i = HU.testCase (printf msg i) (exists (f i))
+    exists x =  HU.assertBool "" (x `seq` True)
+
+    -- Combine two lists alternatingly
+    -- splice [1,3,5] [2,4,6,8,10] ==> [1,2,3,4,5,6,7,10]
+    splice []     ys = ys
+    splice (x:xs) ys = x : splice ys xs
 
 
 
@@ -46,16 +51,14 @@ examplesBackAndForth :: TestTree
 examplesBackAndForth = testGroup "Conversion beween various examples" tests
   where
     tests = concat
-        [ [ HU.testCase (printf "#%2d: %s -> PGP words" i (bsToHex bytes))
+        [ [ HU.testCase (printf "#%2d: Bytes to PGP words" i)
                         (HU.assertEqual "" (toText bytes) pgpWords)
-          , HU.testCase (printf "#%2d: PGP words -> %s" i (bsToHex bytes))
+          , HU.testCase (printf "#%2d: PGP words to bytes" i)
                         (HU.assertEqual "" (Right bytes) (fromText pgpWords))
           ]
         | (bytes, pgpWords) <- testCases
         | i <- [0..] :: [Int]
         ]
-    bsToHex :: BSL.ByteString -> String
-    bsToHex = concatMap (printf "%02x") . BSL.unpack
 
     testCases = map (\(x,y) -> (BSL.pack x, y))
         [ ( [0xce, 0xe7, 0x1c, 0xbf, 0xe6, 0x59, 0x49, 0x48]
