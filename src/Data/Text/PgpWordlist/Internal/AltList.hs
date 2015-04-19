@@ -20,9 +20,7 @@ module Data.Text.PgpWordlist.Internal.AltList (
 
 
 
-#if __GLASGOW_HASKELL__ < 710
 import Control.Applicative
-#endif
 
 #if MIN_VERSION_base(4,8,0)
 import qualified Data.Bifunctor as Bi
@@ -31,53 +29,57 @@ import qualified Data.Bifunctor as Bi
 
 
 -- | List of elements of alternating element types.
-data AltList a b = Nil | Cons a (AltList b a)
+data AltList a b = Nil | a :<> AltList b a
     deriving (Eq, Ord, Show)
+
+infixr 5 :<> -- same as (:)
 
 
 
 -- | Simple conversion function. Inverse of 'toList'.
 fromList :: [a] -> AltList a a
-fromList = foldr Cons Nil
+fromList = foldr (:<>) Nil
 
 -- | Simple conversion function. Inverse of 'fromList'.
 toList :: AltList a a -> [a]
 toList Nil = []
-toList (Cons x xs) = x : toList xs
+toList (x :<> xs) = x : toList xs
 
 
 
--- | Map over the first component of an 'AltList'.
+-- | Map over every other element of an 'AltList', starting with the first
+--   entry.
 --
 -- @
 -- 'first' f ≡ 'bimap' f 'id'
 -- @
 first :: (a -> a') -> AltList a b -> AltList a' b
 first _ Nil = Nil
-first f (Cons x Nil) = Cons (f x) Nil
-first f (Cons x (Cons y ys)) = Cons (f x) (Cons y (first f ys))
+first f (x :<> Nil) = f x :<> Nil
+first f (x :<> y :<> ys) = f x :<> y :<> first f ys
 
 
 
--- | Map over the second component of an 'AltList'.
+-- | Map over every other element of an 'AltList', starting with the second
+--   entry.
 --
 -- @
 -- 'second' g ≡ 'bimap' 'id' g
 -- @
 second :: (b -> b') -> AltList a b -> AltList a b'
 second _ Nil = Nil
-second g (Cons x xs) = Cons x (first g xs)
+second g (x :<> xs) = x :<> first g xs
 
 
 
--- | Map over the both components of an 'AltList'.
+-- | Map over the both types of entries of an 'AltList'.
 --
 -- @
 -- 'bimap' f g ≡ 'second' g . 'first' f
 -- @
 bimap :: (a -> a') -> (b -> b') -> AltList a b -> AltList a' b'
 bimap _ _ Nil = Nil
-bimap f g (Cons x xs) = Cons (f x) (bimap g f xs)
+bimap f g (x :<> xs) = f x :<> bimap g f xs
 
 
 
@@ -90,12 +92,12 @@ instance Bi.Bifunctor AltList where
 
 
 
--- | Monomorphic bisequence.
+-- | The 'Data.Bifunctor.Bifunctor' analogon to 'Data.Traversable.sequenceA'.
 bisequence :: Applicative f => AltList (f a) (f b) -> f (AltList a b)
 bisequence Nil = pure Nil
-bisequence (Cons x xs) = Cons <$> x <*> bisequence xs
+bisequence (x :<> xs) = liftA2 (:<>) x (bisequence xs)
 
--- | Monomorphic bitraverse.
+-- | The 'Data.Bifunctor.Bifunctor' analogon to 'Data.Traversable.traverse'.
 bitraverse :: Applicative f => (a -> f c) -> (b -> f d) -> AltList a b -> f (AltList c d)
 bitraverse _ _ Nil = pure Nil
-bitraverse f g (Cons x xs) = Cons <$> f x <*> bitraverse g f xs
+bitraverse f g (x :<> xs) = liftA2 (:<>) (f x) (bitraverse g f xs)
