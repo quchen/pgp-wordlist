@@ -9,9 +9,7 @@ module Data.Text.PgpWordlist.Internal.Convert where
 import qualified Data.Text.PgpWordlist.Internal.AltList as Alt
 import           Data.Text.PgpWordlist.Internal.Types
 import           Data.Text.PgpWordlist.Internal.Words
-
-import           Data.Bimap                             (Bimap, (!))
-import qualified Data.Bimap                             as BM
+import           Data.Text.PgpWordlist.Internal.Word8Bimap
 
 import qualified Data.ByteString.Lazy                   as BSL
 import           Data.Text                              (Text)
@@ -42,42 +40,42 @@ fromText = fmap (BSL.pack . Alt.toList)
 
 -- | Look up the word corresponding to a byte.
 toEvenWord :: Word8 -> EvenWord
-toEvenWord = (evenMap !) -- evenMap is total, so the lookup is safe
+toEvenWord = lookupL evenMap
 
 -- | Look up the word corresponding to a byte.
 toOddWord :: Word8 -> OddWord
-toOddWord = (oddMap !) -- oddMap is total, so the lookup is safe
+toOddWord = lookupL oddMap
 
 
 
 -- | Simple conversion, taking into account invalid words.
 fromEvenWord :: Text -> Either TranslationError Word8
-fromEvenWord word = case BM.lookupR (EvenWord word) evenMap of
+fromEvenWord word = case lookupR evenMap (EvenWord word) of
     Just i  -> Right i
-    Nothing -> Left (case BM.lookupR (OddWord word) oddMap of
+    Nothing -> Left (case lookupR oddMap (OddWord word) of
         Just j  -> BadParity word j
         Nothing -> BadWord word)
 
 -- | Simple conversion, taking into account invalid words.
 fromOddWord :: Text -> Either TranslationError Word8
-fromOddWord word = case BM.lookupR (OddWord word) oddMap of
+fromOddWord word = case lookupR oddMap (OddWord word) of
     Just i  -> Right i
-    Nothing -> Left (case BM.lookupR (EvenWord word) evenMap of
+    Nothing -> Left (case lookupR evenMap (EvenWord word) of
         Just j  -> BadParity word j
         Nothing -> BadWord word)
 
 
 
 -- | Mapping from and to 'EvenWord's
-evenMap :: Bimap Word8 EvenWord
-evenMap = BM.fromList (map pick12 wordList)
+evenMap :: Word8Bimap EvenWord
+evenMap = unsafeConstruct (map pick12 wordList)
   where
     pick12 :: (a,b,c) -> (a,b)
     pick12 (i,e,_) = (i,e)
 
 -- | Mapping from and to 'OddWord's
-oddMap :: Bimap Word8 OddWord
-oddMap = BM.fromList (map pick13 wordList)
+oddMap :: Word8Bimap OddWord
+oddMap = unsafeConstruct (map pick13 wordList)
   where
     pick13 :: (a,b,c) -> (a,c)
     pick13 (i,_,o) = (i,o)

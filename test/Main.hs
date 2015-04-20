@@ -118,5 +118,7 @@ randomRoundtrips = makeGroup tests
               . testGroup "Random roundtrips"
     tests = [ QC.testProperty "Bytes -> PGP words -> Bytes" $
                 \bytes -> let bs = BSL.pack bytes
-                          in  fromText (toText bs) == Right bs
+                          in  length bytes > 10
+                              QC.==>
+                              fromText (toText bs) == Right bs
             ]
