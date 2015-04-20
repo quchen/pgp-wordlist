@@ -6,14 +6,14 @@ module Data.Text.PgpWordlist.Internal.Convert where
 
 
 
-import qualified Data.Text.PgpWordlist.Internal.AltList as Alt
+import qualified Data.Text.PgpWordlist.Internal.AltList    as Alt
 import           Data.Text.PgpWordlist.Internal.Types
-import           Data.Text.PgpWordlist.Internal.Words
 import           Data.Text.PgpWordlist.Internal.Word8Bimap
+import           Data.Text.PgpWordlist.Internal.Words
 
-import qualified Data.ByteString.Lazy                   as BSL
-import           Data.Text                              (Text)
-import qualified Data.Text                              as T
+import qualified Data.ByteString.Lazy                      as BSL
+import           Data.Text                                 (Text)
+import qualified Data.Text                                 as T
 import           Data.Word
 
 

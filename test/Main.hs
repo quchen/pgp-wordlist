@@ -8,11 +8,11 @@ module Main where
 import           Data.Text.PgpWordlist.Internal.Convert
 
 import qualified Data.ByteString.Lazy                   as BSL
+import           Data.Word
 import           Test.Tasty
 import qualified Test.Tasty.HUnit                       as HU
 import qualified Test.Tasty.QuickCheck                  as QC
 import           Text.Printf
-import           Data.Word
 
 
 
