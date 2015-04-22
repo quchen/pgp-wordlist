@@ -50,19 +50,22 @@ toOddWord = lookupL oddMap
 
 -- | Simple conversion, taking into account invalid words.
 fromEvenWord :: Text -> Either TranslationError Word8
-fromEvenWord word = case lookupR evenMap (EvenWord word) of
-    Just i  -> Right i
-    Nothing -> Left (case lookupR oddMap (OddWord word) of
-        Just j  -> BadParity word j
-        Nothing -> BadWord word)
+fromEvenWord word = case lookupEvenOdd word of
+    (Just byte, _x       ) -> Right byte
+    (Nothing  , Just byte) -> Left (BadParity word byte)
+    (Nothing  , Nothing  ) -> Left (BadWord word)
 
 -- | Simple conversion, taking into account invalid words.
 fromOddWord :: Text -> Either TranslationError Word8
-fromOddWord word = case lookupR oddMap (OddWord word) of
-    Just i  -> Right i
-    Nothing -> Left (case lookupR evenMap (EvenWord word) of
-        Just j  -> BadParity word j
-        Nothing -> BadWord word)
+fromOddWord word = case lookupEvenOdd word of
+    (_x       , Just byte) -> Right byte
+    (Just byte, Nothing  ) -> Left (BadParity word byte)
+    (Nothing  , Nothing  ) -> Left (BadWord word)
+
+-- | Look up a word in both databases.
+lookupEvenOdd :: Text -> (Maybe Word8, Maybe Word8)
+lookupEvenOdd word = ( lookupR evenMap (EvenWord word)
+                     , lookupR oddMap  (OddWord word) )
 
 
 
