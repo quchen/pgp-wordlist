@@ -5,14 +5,15 @@ module Main where
 
 
 
-import           Data.Text.PgpWordlist.Internal.Convert
-
+import           Control.DeepSeq
 import qualified Data.ByteString.Lazy                   as BSL
-import           Data.Word
 import           Test.Tasty
 import qualified Test.Tasty.HUnit                       as HU
 import qualified Test.Tasty.QuickCheck                  as QC
 import           Text.Printf
+
+import           Data.Text.PgpWordlist.Internal.Convert
+import           Data.Text.PgpWordlist.Internal.Types
 
 
 
@@ -31,19 +32,14 @@ tree = testGroup "Tests"
 
 
 allBytesConvertible :: TestTree
-allBytesConvertible = testGroup "All bytes have a corresponding word" tests
+allBytesConvertible = HU.testCase description test
   where
-    tests = splice (map evenTest allWord8) (map oddTest allWord8)
-    allWord8 = [minBound ..] :: [Word8]
-    evenTest = testExists "%02x is convertible to an even word" toEvenWord
-    oddTest  = testExists "%02x is convertible to an odd word"  toOddWord
-    testExists msg f i = HU.testCase (printf msg i) (exists (f i))
-    exists x =  HU.assertBool "" (x `seq` True)
-
-    -- Combine two lists alternatingly
-    -- splice [1,3,5] [2,4,6,8,10] ==> [1,2,3,4,5,6,7,10]
-    splice []     ys = ys
-    splice (x:xs) ys = x : splice ys xs
+    description = "All bytes have a corresponding even/odd word"
+    assertNoBottoms x = x `deepseq` HU.assertBool "" True
+    test = assertNoBottoms (do
+        byte <- [minBound ..]
+        convert <- [unEvenWord . toEvenWord, unOddWord . toOddWord]
+        pure $! convert byte )
 
 
 
