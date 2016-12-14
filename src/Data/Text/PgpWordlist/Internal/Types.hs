@@ -2,9 +2,9 @@ module Data.Text.PgpWordlist.Internal.Types where
 
 
 
-import           Data.Text                              (Text)
-import           Data.Text.PgpWordlist.Internal.AltList
-import           Data.Word
+import Data.Text                              (Text)
+import Data.Text.PgpWordlist.Internal.AltList
+import Data.Word
 
 
 

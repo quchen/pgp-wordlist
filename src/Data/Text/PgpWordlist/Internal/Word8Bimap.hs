@@ -15,8 +15,8 @@ import qualified Data.Map    as M
 import           Data.Vector (Vector, (!))
 import qualified Data.Vector as V
 
-import           Data.Tuple
-import           Data.Word
+import Data.Tuple
+import Data.Word
 
 
 

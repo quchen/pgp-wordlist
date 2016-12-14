@@ -4,9 +4,9 @@ module Data.Text.PgpWordlist.Internal.Words where
 
 
 
-import           Data.Text.PgpWordlist.Internal.Types
+import Data.Text.PgpWordlist.Internal.Types
 
-import           Data.Word
+import Data.Word
 
 
 

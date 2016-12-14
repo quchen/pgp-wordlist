@@ -20,10 +20,10 @@ module Data.Text.PgpWordlist.Internal.AltList (
 
 
 
-import           Control.Applicative
+import Control.Applicative
 
 #if MIN_VERSION_base(4,8,0)
-import qualified Data.Bifunctor      as Bi
+import qualified Data.Bifunctor as Bi
 #endif
 
 

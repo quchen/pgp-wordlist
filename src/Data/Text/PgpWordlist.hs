@@ -7,5 +7,5 @@ module Data.Text.PgpWordlist (
 
 
 
-import           Data.Text.PgpWordlist.Internal.Convert
-import           Data.Text.PgpWordlist.Internal.Types
+import Data.Text.PgpWordlist.Internal.Convert
+import Data.Text.PgpWordlist.Internal.Types

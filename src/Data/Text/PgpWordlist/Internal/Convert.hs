@@ -11,14 +11,17 @@ import           Data.Text.PgpWordlist.Internal.Types
 import           Data.Text.PgpWordlist.Internal.Word8Bimap
 import           Data.Text.PgpWordlist.Internal.Words
 
-import qualified Data.ByteString.Lazy                      as BSL
-import           Data.Text                                 (Text)
-import qualified Data.Text                                 as T
+import qualified Data.ByteString.Lazy as BSL
+import           Data.Text            (Text)
+import qualified Data.Text            as T
 import           Data.Word
 
 
 
 -- | Inverse of 'fromText', modulo whitespace count.
+--
+-- >>> toText (BSL.pack [104, 101, 108, 108, 111])
+-- "frighten glossary glucose handiwork gremlin"
 toText :: BSL.ByteString -> Text
 toText = T.intercalate " "
        . Alt.toList
@@ -30,6 +33,20 @@ toText = T.intercalate " "
 
 -- | Convert a text of whitespace-separated words to their binary
 --   representation. The whitespace splitting behaviour is given by 'T.words'.
+--
+-- >>> fromText (T.pack "frighten glossary glucose handiwork gremlin")
+-- Right "hello"
+--
+-- Invalid words are recognized:
+--
+-- >>> fromText (T.pack "frighten dragon glucose handiwork gremlin")
+-- Left (BadWord "dragon")
+--
+-- Typical mistakes include accidentally swapping numbers, which leads to a
+-- parity error:
+--
+-- >>> fromText (T.pack "frighten glucose glossary handiwork gremlin")
+-- Left (BadParity "glucose" 108)
 fromText :: Text -> Either TranslationError BSL.ByteString
 fromText = fmap (BSL.pack . Alt.toList)
          . Alt.bitraverse fromEvenWord fromOddWord
