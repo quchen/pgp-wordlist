@@ -1,4 +1,3 @@
-{-# LANGUAGE NumDecimals #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ParallelListComp  #-}
 
@@ -113,7 +112,7 @@ randomRoundtrips :: TestTree
 randomRoundtrips = makeGroup tests
   where
     makeGroup = localOption (QC.QuickCheckMaxSize 1024)
-              . localOption (QC.QuickCheckTests 1e3)
+              . localOption (QC.QuickCheckTests 1000)
               . testGroup "Random roundtrips"
     tests = [ QC.testProperty "Bytes -> PGP words -> Bytes" $
                 \bytes -> let bs = BSL.pack bytes
