@@ -1,5 +1,5 @@
 name:                pgp-wordlist
-version:             0.1.0.2
+version:             0.1.0.3
 synopsis:            Translate between binary data and a human-readable
                      collection of words.
 description:         Translate between binary data and a human-readable
