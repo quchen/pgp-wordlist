@@ -81,7 +81,8 @@ bimap :: (a -> a') -> (b -> b') -> AltList a b -> AltList a' b'
 bimap _ _ Nil = Nil
 bimap f g (x :<> xs) = f x :<> bimap g f xs
 
-
+instance Functor (AltList a) where
+    fmap = second
 
 #if MIN_VERSION_base(4,8,0)
 instance Bi.Bifunctor AltList where
